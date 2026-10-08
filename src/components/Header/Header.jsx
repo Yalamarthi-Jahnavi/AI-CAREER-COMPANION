@@ -149,7 +149,7 @@ function NotificationPanel({ isOpen, onClose }) {
 
 // ─── User Profile Menu ─────────────────────────────────────────
 function UserMenu({ isOpen, onClose }) {
-  const { user, logout } = useUserStore()
+  const { user, logout, updateProfile } = useUserStore()
   const navigate = useNavigate()
   const ref = useRef(null)
   useClickOutside(ref, isOpen ? onClose : () => {})
@@ -160,8 +160,21 @@ function UserMenu({ isOpen, onClose }) {
     onClose()
   }
 
-  const displayName = user?.name || 'Rahul Sharma'
+  const handleToggleAdminRole = () => {
+    const nextRole = user?.role === 'admin' ? 'user' : 'admin'
+    updateProfile({ role: nextRole })
+    toast.success(`Role switched to ${nextRole.toUpperCase()}`, { icon: nextRole === 'admin' ? '🛡️' : '👤' })
+    if (nextRole === 'admin') {
+      navigate('/admin')
+    } else {
+      navigate('/app/dashboard')
+    }
+    onClose()
+  }
+
+  const displayName = user?.name || 'Yalamarthijahnavi9'
   const displayRole = user?.role || 'Software Engineer'
+  const isAdmin = user?.role === 'admin'
 
   return (
     <AnimatePresence>
@@ -174,12 +187,27 @@ function UserMenu({ isOpen, onClose }) {
           transition={{ duration: 0.18 }}
           className="absolute right-0 top-full mt-2 w-64 bg-white border border-slate-200 rounded-2xl shadow-xl overflow-hidden z-50 text-slate-800"
         >
-          <div className="px-4 py-3.5 border-b border-slate-100 bg-slate-50/50">
-            <p className="text-xs font-bold text-slate-900 truncate">{displayName}</p>
-            <p className="text-[11px] text-slate-500 truncate">{displayRole}</p>
+          <div className="px-4 py-3.5 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
+            <div className="min-w-0 flex-1">
+              <p className="text-xs font-bold text-slate-900 truncate">{displayName}</p>
+              <p className="text-[11px] text-slate-500 truncate">{displayRole}</p>
+            </div>
+            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
+              isAdmin ? 'bg-purple-100 text-purple-700 border-purple-200' : 'bg-blue-100 text-blue-700 border-blue-200'
+            }`}>
+              {isAdmin ? 'Admin' : 'User'}
+            </span>
           </div>
 
           <div className="p-1.5 space-y-0.5 text-xs">
+            <button
+              onClick={() => { navigate('/admin'); onClose() }}
+              className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-purple-700 hover:bg-purple-50 transition-colors text-left font-bold"
+            >
+              <Shield className="w-3.5 h-3.5 text-purple-600" />
+              <span>Admin Center</span>
+            </button>
+
             <button
               onClick={() => { navigate('/app/profile'); onClose() }}
               className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 hover:bg-slate-100 transition-colors text-left"
@@ -187,6 +215,16 @@ function UserMenu({ isOpen, onClose }) {
               <User className="w-3.5 h-3.5 text-slate-500" />
               <span>Your Profile</span>
             </button>
+
+            <button
+              onClick={handleToggleAdminRole}
+              className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 hover:bg-slate-100 transition-colors text-left"
+              title="Toggle role for testing RBAC"
+            >
+              <KeyRound className="w-3.5 h-3.5 text-slate-500" />
+              <span>Switch to {isAdmin ? 'Normal User' : 'Admin Role'}</span>
+            </button>
+
             <button
               onClick={() => { navigate('/app/feedback'); onClose() }}
               className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 hover:bg-slate-100 transition-colors text-left"
@@ -194,6 +232,7 @@ function UserMenu({ isOpen, onClose }) {
               <HelpCircle className="w-3.5 h-3.5 text-slate-500" />
               <span>Help & Feedback</span>
             </button>
+
             <button
               onClick={handleLogout}
               className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-red-600 hover:bg-red-50 transition-colors text-left font-medium"
@@ -226,6 +265,7 @@ export function Header() {
   const displayName = user?.name || 'Yalamarthijahnavi9'
   const displayRole = user?.role || 'Software Engineer'
   const initials = user?.initials || 'RS'
+  const isAdmin = user?.role === 'admin'
 
   return (
     <>
@@ -250,7 +290,18 @@ export function Header() {
         </div>
 
         {/* Right tools: notification, theme icon, user card */}
-        <div className="flex items-center gap-3 md:gap-4 shrink-0">
+        <div className="flex items-center gap-2.5 md:gap-3.5 shrink-0">
+          {/* Admin badge link */}
+          {isAdmin && (
+            <button
+              onClick={() => navigate('/admin')}
+              className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 text-xs font-bold transition-all shadow-2xs"
+              title="Open Administrator Command Center"
+            >
+              <Shield className="w-3.5 h-3.5 text-purple-600" />
+              <span>Admin Hub</span>
+            </button>
+          )}
           {/* Notification bell with red badge (3) */}
           <div className="relative">
             <button

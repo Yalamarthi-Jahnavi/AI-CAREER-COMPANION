@@ -26,6 +26,8 @@ import { ResignationChecklist } from '../pages/ResignationChecklist'
 import { Feedback } from '../pages/Feedback'
 import { SkillGapAnalyzer } from '../pages/SkillGapAnalyzer'
 import { PlaceholderPage } from '../pages/PlaceholderPage'
+import { AdminDashboard } from '../pages/AdminDashboard'
+import { AdminRoute } from '../components/Admin/AdminRoute'
 import {
   Briefcase, AlertTriangle, Calendar, Map, BookOpen, Code2,
   FolderKanban, BarChart3, FileText, FileScan, MicVocal,
@@ -210,6 +212,24 @@ export const router = createBrowserRouter([
 
   // Product Showcase / Landing Page
   { path: '/landing', element: <LandingPage /> },
+
+  // Dedicated Admin Command Center (Protected by RBAC AdminRoute)
+  {
+    path: '/admin',
+    element: (
+      <AdminRoute>
+        <AdminDashboard />
+      </AdminRoute>
+    ),
+  },
+  {
+    path: '/admin/dashboard',
+    element: (
+      <AdminRoute>
+        <AdminDashboard />
+      </AdminRoute>
+    ),
+  },
 
   // App shell
   {
